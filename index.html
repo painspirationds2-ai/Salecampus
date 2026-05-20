@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Report – 20 พ.ค. 2569</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soon: #FF6B35;
+    --soon-light: #FFF0E8;
+    --soon-mid: #FFCFB3;
+    --ntds: #2563EB;
+    --ntds-light: #EFF6FF;
+    --ntds-mid: #BFDBFE;
+    --ink: #0F172A;
+    --muted: #64748B;
+    --line: #E2E8F0;
+    --bg: #F8FAFC;
+    --white: #FFFFFF;
+    --green: #10B981;
+    --amber: #F59E0B;
+    --red: #EF4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans Thai', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 28px;
+  }
+
+  /* ── HEADER ── */
+  .report-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 3px solid var(--ink);
+    margin-bottom: 24px;
+  }
+  .report-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  .report-header h1 span { color: var(--muted); font-weight: 400; font-size: 18px; display: block; margin-top: 2px; }
+  .date-badge {
+    background: var(--ink);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── SUMMARY STRIP ── */
+  .summary-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .brand-card {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid transparent;
+  }
+  .brand-card.soon { border-color: var(--soon); background: var(--soon-light); }
+  .brand-card.ntds { border-color: var(--ntds); background: var(--ntds-light); }
+
+  .brand-header {
+    padding: 14px 18px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .soon .brand-dot { background: var(--soon); }
+  .ntds .brand-dot { background: var(--ntds); }
+
+  .brand-name {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .soon .brand-name { color: var(--soon); }
+  .ntds .brand-name { color: var(--ntds); }
+
+  .branch-label { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+  .kpi {
+    padding: 12px 16px;
+    border-right: 1px solid rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .kpi:last-child { border-right: none; }
+  .kpi-val {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: 'DM Mono', monospace;
+    line-height: 1.1;
+    display: block;
+  }
+  .soon .kpi-val { color: var(--soon); }
+  .ntds .kpi-val { color: var(--ntds); }
+  .kpi-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* ── SECTIONS ── */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ── TWO-COL DETAIL GRID ── */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .detail-panel {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    overflow: hidden;
+  }
+  .detail-panel .panel-head {
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .soon-panel .panel-head { background: var(--soon-light); color: var(--soon); border-bottom-color: var(--soon-mid); }
+  .ntds-panel .panel-head { background: var(--ntds-light); color: var(--ntds); border-bottom-color: var(--ntds-mid); }
+
+  /* ── PEAK TIME CHART ── */
+  .peak-wrap { padding: 12px 14px 10px; }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .bar-hour {
+    width: 30px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .bar-track {
+    flex: 1;
+    height: 14px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+    position: relative;
+  }
+  .soon-fill { background: linear-gradient(90deg, var(--soon), #FF9A6C); }
+  .ntds-fill { background: linear-gradient(90deg, var(--ntds), #60A5FA); }
+  .peak-label {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+  }
+  .bar-bills {
+    width: 24px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .peak-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 99px;
+    margin-left: 3px;
+  }
+  .peak-soon { background: var(--soon); color: #fff; }
+  .peak-ntds { background: var(--ntds); color: #fff; }
+
+  /* ── SKU TABLE ── */
+  .sku-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+  .sku-table th {
+    padding: 6px 10px;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .sku-table th:last-child, .sku-table td:last-child { text-align: right; }
+  .sku-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .sku-table tr:last-child td { border-bottom: none; }
+  .sku-table tr:hover td { background: var(--bg); }
+  .sku-code { font-family: 'DM Mono', monospace; font-size: 9.5px; color: var(--muted); }
+  .sku-name { font-weight: 600; font-size: 11px; line-height: 1.3; }
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 800;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+  .rank-1 { background: #FCD34D; color: #78350F; }
+  .rank-2 { background: #CBD5E1; color: #1E293B; }
+  .rank-3 { background: #FDBA74; color: #78350F; }
+  .rank-other { background: var(--line); color: var(--muted); }
+  .qty-chip {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .soon-chip { background: var(--soon-mid); color: #7C2D12; }
+  .ntds-chip { background: var(--ntds-mid); color: #1E3A8A; }
+  .rev-val { font-family: 'DM Mono', monospace; font-weight: 600; font-size: 11px; }
+
+  /* ── CATEGORY ── */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .cat-panel {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    overflow: hidden;
+  }
+  .cat-row {
+    display: flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--line);
+    gap: 8px;
+  }
+  .cat-row:last-child { border-bottom: none; }
+  .cat-name { flex: 1; font-size: 11.5px; font-weight: 600; }
+  .cat-bar-wrap { width: 80px; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .cat-bar { height: 100%; border-radius: 4px; }
+  .soon-cat { background: var(--soon); }
+  .ntds-cat { background: var(--ntds); }
+  .cat-num { font-family: 'DM Mono', monospace; font-size: 10.5px; font-weight: 600; width: 56px; text-align: right; }
+  .cat-qty { font-size: 10px; color: var(--muted); width: 28px; text-align: right; }
+
+  /* ── PAYMENT ── */
+  .pay-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .pay-panel {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    overflow: hidden;
+  }
+  .pay-row {
+    display: flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--line);
+    gap: 8px;
+  }
+  .pay-row:last-child { border-bottom: none; }
+  .pay-icon { width: 28px; height: 28px; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; }
+  .pay-name { flex: 1; font-size: 12px; font-weight: 600; }
+  .pay-amt { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700; }
+  .pay-pct { font-size: 10px; color: var(--muted); width: 36px; text-align: right; }
+
+  /* ── INSIGHTS BOX ── */
+  .insights {
+    background: var(--ink);
+    color: #fff;
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .insights h3 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 10px;
+    grid-column: 1/-1;
+  }
+  .insight-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .insight-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    margin-top: 6px; flex-shrink: 0;
+  }
+  .i-soon { background: var(--soon); }
+  .i-ntds { background: var(--ntds); }
+  .insight-item p { font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.85); }
+  .insight-item p strong { color: #fff; }
+
+  /* ── FOOTER ── */
+  .report-footer {
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: #fff; }
+    .page { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="report-header">
+    <div>
+      <h1>รายงานยอดขาย วันแรก<span>Central Khonkaen Campus · สาขา SOON FL.1 & NTDS FL.G</span></h1>
+    </div>
+    <div class="date-badge">20 / 05 / 2569</div>
+  </div>
+
+  <!-- KPI SUMMARY -->
+  <div class="summary-strip">
+
+    <div class="brand-card soon">
+      <div class="brand-header">
+        <div class="brand-dot"></div>
+        <div class="brand-name">SOON</div>
+        <div class="branch-label">Central Khonkaen FL.1</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi">
+          <span class="kpi-val">11,940</span>
+          <span class="kpi-label">ยอดขาย (฿)</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-val">28</span>
+          <span class="kpi-label">จำนวนบิล</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-val">43</span>
+          <span class="kpi-label">ชิ้นที่ขายได้</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-val">426</span>
+          <span class="kpi-label">Avg/บิล (฿)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-card ntds">
+      <div class="brand-header">
+        <div class="brand-dot"></div>
+        <div class="brand-name">NTDS</div>
+        <div class="branch-label">Central Khonkaen FL.G</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi">
+          <span class="kpi-val">46,290</span>
+          <span class="kpi-label">ยอดขาย (฿)</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-val">124</span>
+          <span class="kpi-label">จำนวนบิล</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-val">223</span>
+          <span class="kpi-label">ชิ้นที่ขายได้</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-val">373</span>
+          <span class="kpi-label">Avg/บิล (฿)</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PEAK TIME -->
+  <div class="section-title">⏱ Peak Time Analysis – ยอดขายรายชั่วโมง</div>
+  <div class="detail-grid" style="margin-bottom:20px;">
+
+    <div class="detail-panel soon-panel">
+      <div class="panel-head">🟠 SOON FL.1 – Peak Time</div>
+      <div class="peak-wrap">
+        <!-- SOON hours: 12–21 -->
+        <!-- max rev = 2170 (14:xx) max bills = 7 -->
+        <div style="display:flex;gap:6px;margin-bottom:6px;font-size:9px;color:var(--muted);font-weight:600;">
+          <span style="width:30px;text-align:right;">ชม.</span>
+          <span style="flex:1;">ยอดขาย (฿)</span>
+          <span style="width:24px;text-align:right;">บิล</span>
+        </div>
+        <!-- rows -->
+        <div class="bar-row"><span class="bar-hour">12</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:79.7%"><span class="peak-label">1,730</span></div></div><span class="bar-bills">2</span></div>
+        <div class="bar-row"><span class="bar-hour">13</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:72.8%"><span class="peak-label">1,580</span></div></div><span class="bar-bills">4</span></div>
+        <div class="bar-row">
+          <span class="bar-hour">14<span class="peak-tag peak-soon" style="font-size:7px;margin-left:1px;">PEAK</span></span>
+          <div class="bar-track"><div class="bar-fill soon-fill" style="width:100%"><span class="peak-label">2,170</span></div></div><span class="bar-bills">7</span>
+        </div>
+        <div class="bar-row"><span class="bar-hour">15</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:16.1%"></div></div><span class="bar-bills">1</span></div>
+        <div class="bar-row"><span class="bar-hour">16</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:24.9%"></div></div><span class="bar-bills">2</span></div>
+        <div class="bar-row"><span class="bar-hour">17</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:90.8%"><span class="peak-label">1,970</span></div></div><span class="bar-bills">5</span></div>
+        <div class="bar-row"><span class="bar-hour">18</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:80.2%"><span class="peak-label">1,740</span></div></div><span class="bar-bills">4</span></div>
+        <div class="bar-row"><span class="bar-hour">19</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:18%"></div></div><span class="bar-bills">1</span></div>
+        <div class="bar-row"><span class="bar-hour">20</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:49.8%"><span class="peak-label">1,080</span></div></div><span class="bar-bills">1</span></div>
+        <div class="bar-row"><span class="bar-hour">21</span><div class="bar-track"><div class="bar-fill soon-fill" style="width:18%"></div></div><span class="bar-bills">1</span></div>
+
+        <div style="margin-top:10px;padding:8px 10px;background:var(--soon-light);border-radius:8px;border:1px solid var(--soon-mid);">
+          <div style="font-size:10px;font-weight:700;color:var(--soon);margin-bottom:2px;">🔥 Peak Window</div>
+          <div style="font-size:11px;font-weight:600;">14:00–15:00 น. · 7 บิล · ฿2,170</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Peak ที่ 2 คือ 17:00–18:00 น. · 5 บิล · ฿1,970</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-panel ntds-panel">
+      <div class="panel-head">🔵 NTDS FL.G – Peak Time</div>
+      <div class="peak-wrap">
+        <div style="display:flex;gap:6px;margin-bottom:6px;font-size:9px;color:var(--muted);font-weight:600;">
+          <span style="width:30px;text-align:right;">ชม.</span>
+          <span style="flex:1;">ยอดขาย (฿)</span>
+          <span style="width:24px;text-align:right;">บิล</span>
+        </div>
+        <!-- max rev = 8690 (20xx) -->
+        <div class="bar-row"><span class="bar-hour">9</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:1.7%"></div></div><span class="bar-bills">1</span></div>
+        <div class="bar-row"><span class="bar-hour">10</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:2.3%"></div></div><span class="bar-bills">1</span></div>
+        <div class="bar-row"><span class="bar-hour">11</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:19.6%"></div></div><span class="bar-bills">7</span></div>
+        <div class="bar-row"><span class="bar-hour">12</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:16%"></div></div><span class="bar-bills">4</span></div>
+        <div class="bar-row"><span class="bar-hour">13</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:24.2%"></div></div><span class="bar-bills">11</span></div>
+        <div class="bar-row"><span class="bar-hour">14</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:20.1%"></div></div><span class="bar-bills">7</span></div>
+        <div class="bar-row"><span class="bar-hour">15</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:55.9%"><span class="peak-label">4,860</span></div></div><span class="bar-bills">18</span></div>
+        <div class="bar-row">
+          <span class="bar-hour" style="display:flex;align-items:center;gap:2px;">16<span class="peak-tag peak-ntds" style="font-size:7px;padding:0 4px;">PEAK</span></span>
+          <div class="bar-track"><div class="bar-fill ntds-fill" style="width:99.3%"><span class="peak-label">8,630</span></div></div><span class="bar-bills">21</span>
+        </div>
+        <div class="bar-row"><span class="bar-hour">17</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:53.6%"><span class="peak-label">4,660</span></div></div><span class="bar-bills">9</span></div>
+        <div class="bar-row"><span class="bar-hour">18</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:37.5%"></div></div><span class="bar-bills">15</span></div>
+        <div class="bar-row"><span class="bar-hour">19</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:64.1%"><span class="peak-label">5,570</span></div></div><span class="bar-bills">8</span></div>
+        <div class="bar-row">
+          <span class="bar-hour">20<span class="peak-tag peak-ntds" style="font-size:7px;padding:0 4px;margin-left:2px;">P2</span></span>
+          <div class="bar-track"><div class="bar-fill ntds-fill" style="width:100%"><span class="peak-label">8,690</span></div></div><span class="bar-bills">15</span>
+        </div>
+        <div class="bar-row"><span class="bar-hour">21</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:10.9%"></div></div><span class="bar-bills">4</span></div>
+        <div class="bar-row"><span class="bar-hour">22</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:25.7%"></div></div><span class="bar-bills">2</span></div>
+        <div class="bar-row"><span class="bar-hour">23</span><div class="bar-track"><div class="bar-fill ntds-fill" style="width:1.7%"></div></div><span class="bar-bills">1</span></div>
+
+        <div style="margin-top:10px;padding:8px 10px;background:var(--ntds-light);border-radius:8px;border:1px solid var(--ntds-mid);">
+          <div style="font-size:10px;font-weight:700;color:var(--ntds);margin-bottom:2px;">🔥 Peak Window</div>
+          <div style="font-size:11px;font-weight:600;">16:00–17:00 น. · 21 บิล · ฿8,630</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Peak ที่ 2 คือ 20:00–21:00 น. · 15 บิล · ฿8,690 (ยอดสูงกว่า!)</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TOP SKU -->
+  <div class="section-title">🏆 Top SKUs ที่ขายดี</div>
+  <div class="detail-grid" style="margin-bottom:20px;">
+
+    <div class="detail-panel soon-panel">
+      <div class="panel-head">🟠 SOON FL.1 – Top 10 SKU</div>
+      <table class="sku-table">
+        <thead>
+          <tr><th>#</th><th>สินค้า</th><th>Qty</th><th>ยอด (฿)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="rank-badge rank-1">1</span></td><td><div class="sku-name">OV_Cloude (Dark Grey)</div><div class="sku-code">SOOV0090DY00FF</div></td><td><span class="qty-chip soon-chip">×2</span></td><td class="rev-val">1,380</td></tr>
+          <tr><td><span class="rank-badge rank-2">2</span></td><td><div class="sku-name">OV_Hidden Disk (Black)</div><div class="sku-code">SOOV0093BK00FF</div></td><td><span class="qty-chip soon-chip">×2</span></td><td class="rev-val">780</td></tr>
+          <tr><td><span class="rank-badge rank-3">3</span></td><td><div class="sku-name">OV_Cloude (Black)</div><div class="sku-code">SOOV0090BK00FF</div></td><td><span class="qty-chip soon-chip">×1</span></td><td class="rev-val">690</td></tr>
+          <tr><td><span class="rank-badge rank-other">4</span></td><td><div class="sku-name">OV_Circle Green (Black)</div><div class="sku-code">SOOV0096BK00FF</div></td><td><span class="qty-chip soon-chip">×1</span></td><td class="rev-val">590</td></tr>
+          <tr><td><span class="rank-badge rank-other">5</span></td><td><div class="sku-name">SK_Long marty (Cream)(F)</div><div class="sku-code">SOSK0004CRFF</div></td><td><span class="qty-chip soon-chip">×2</span></td><td class="rev-val">590</td></tr>
+          <tr><td><span class="rank-badge rank-other">6</span></td><td><div class="sku-name">PT_OV Alden (Dark grey)</div><div class="sku-code">SOPT0003GR00FF</div></td><td><span class="qty-chip soon-chip">×1</span></td><td class="rev-val">550</td></tr>
+          <tr><td><span class="rank-badge rank-other">7</span></td><td><div class="sku-name">TS_OV Wingle (White)(F)</div><div class="sku-code">SOTS0001WHFF-S</div></td><td><span class="qty-chip soon-chip">×4</span></td><td class="rev-val">500</td></tr>
+          <tr><td><span class="rank-badge rank-other">8</span></td><td><div class="sku-name">CP_Ctrl V (White)(F)</div><div class="sku-code">SOCP0003WHFF-S</div></td><td><span class="qty-chip soon-chip">×4</span></td><td class="rev-val">452</td></tr>
+          <tr><td><span class="rank-badge rank-other">9</span></td><td><div class="sku-name">OV_Letter Hints (Black)</div><div class="sku-code">SOOV0095BK00FF</div></td><td><span class="qty-chip soon-chip">×1</span></td><td class="rev-val">450</td></tr>
+          <tr><td><span class="rank-badge rank-other">10</span></td><td><div class="sku-name">OV_Leon Tee (Black)</div><div class="sku-code">SOOV0045BK00FF</div></td><td><span class="qty-chip soon-chip">×1</span></td><td class="rev-val">450</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-panel ntds-panel">
+      <div class="panel-head">🔵 NTDS FL.G – Top 10 SKU</div>
+      <table class="sku-table">
+        <thead>
+          <tr><th>#</th><th>สินค้า</th><th>Qty</th><th>ยอด (฿)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="rank-badge rank-1">1</span></td><td><div class="sku-name">CT_NTDS SALE 150</div><div class="sku-code">NTSALE150CT</div></td><td><span class="qty-chip ntds-chip">×23</span></td><td class="rev-val">3,450</td></tr>
+          <tr><td><span class="rank-badge rank-2">2</span></td><td><div class="sku-name">JE_NTDS SALE 300</div><div class="sku-code">NTSALE300JE</div></td><td><span class="qty-chip ntds-chip">×11</span></td><td class="rev-val">3,300</td></tr>
+          <tr><td><span class="rank-badge rank-3">3</span></td><td><div class="sku-name">PL_Freshie (Grey)</div><div class="sku-code">NTPL0028GR00FF</div></td><td><span class="qty-chip ntds-chip">×3</span></td><td class="rev-val">2,370</td></tr>
+          <tr><td><span class="rank-badge rank-other">4</span></td><td><div class="sku-name">PL_NTDS SALE 250</div><div class="sku-code">NTSALE250PL</div></td><td><span class="qty-chip ntds-chip">×9</span></td><td class="rev-val">2,250</td></tr>
+          <tr><td><span class="rank-badge rank-other">5</span></td><td><div class="sku-name">TT_NTDS SALE 150</div><div class="sku-code">NTSALE150TT</div></td><td><span class="qty-chip ntds-chip">×14</span></td><td class="rev-val">2,100</td></tr>
+          <tr><td><span class="rank-badge rank-other">6</span></td><td><div class="sku-name">SK_NTDS SALE 200</div><div class="sku-code">NTSALE200SK</div></td><td><span class="qty-chip ntds-chip">×10</span></td><td class="rev-val">2,000</td></tr>
+          <tr><td><span class="rank-badge rank-other">7</span></td><td><div class="sku-name">PO_NTDS SALE 200</div><div class="sku-code">NTSALE200PO</div></td><td><span class="qty-chip ntds-chip">×10</span></td><td class="rev-val">2,000</td></tr>
+          <tr><td><span class="rank-badge rank-other">8</span></td><td><div class="sku-name">OV_NTDS SALE 150</div><div class="sku-code">NTSALE150OV</div></td><td><span class="qty-chip ntds-chip">×10</span></td><td class="rev-val">1,500</td></tr>
+          <tr><td><span class="rank-badge rank-other">9</span></td><td><div class="sku-name">OV_NTDS SALE 200</div><div class="sku-code">NTSALE200OV</div></td><td><span class="qty-chip ntds-chip">×7</span></td><td class="rev-val">1,400</td></tr>
+          <tr><td><span class="rank-badge rank-other">10</span></td><td><div class="sku-name">BT_NTDS SALE 150</div><div class="sku-code">NTSALE150BT</div></td><td><span class="qty-chip ntds-chip">×9</span></td><td class="rev-val">1,350</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- CATEGORY -->
+  <div class="section-title">🗂 ยอดขายตามหมวดหมู่</div>
+  <div class="cat-grid" style="margin-bottom:20px;">
+
+    <div class="cat-panel">
+      <div class="panel-head soon-panel" style="padding:8px 14px;font-size:11px;font-weight:700;color:var(--soon);background:var(--soon-light);border-bottom:1px solid var(--soon-mid);">🟠 SOON FL.1</div>
+      <!-- total rev = 11,940 -->
+      <div class="cat-row"><span class="cat-name">SOON New</span><div class="cat-bar-wrap"><div class="cat-bar soon-cat" style="width:45.3%"></div></div><span class="cat-qty">11 ชิ้น</span><span class="cat-num">5,410</span></div>
+      <div class="cat-row"><span class="cat-name">SOON Hero</span><div class="cat-bar-wrap"><div class="cat-bar soon-cat" style="width:32.7%"></div></div><span class="cat-qty">14 ชิ้น</span><span class="cat-num">3,909</span></div>
+      <div class="cat-row"><span class="cat-name">Soon Sale</span><div class="cat-bar-wrap"><div class="cat-bar soon-cat" style="width:17.6%"></div></div><span class="cat-qty">16 ชิ้น</span><span class="cat-num">2,106</span></div>
+      <div class="cat-row"><span class="cat-name">SOON Acc</span><div class="cat-bar-wrap"><div class="cat-bar soon-cat" style="width:3.3%"></div></div><span class="cat-qty">1 ชิ้น</span><span class="cat-num">390</span></div>
+      <div class="cat-row"><span class="cat-name">SOON Basic</span><div class="cat-bar-wrap"><div class="cat-bar soon-cat" style="width:1%"></div></div><span class="cat-qty">1 ชิ้น</span><span class="cat-num">125</span></div>
+    </div>
+
+    <div class="cat-panel">
+      <div class="panel-head ntds-panel" style="padding:8px 14px;font-size:11px;font-weight:700;color:var(--ntds);background:var(--ntds-light);border-bottom:1px solid var(--ntds-mid);">🔵 NTDS FL.G</div>
+      <!-- total positive rev = 51,590 -->
+      <div class="cat-row"><span class="cat-name">Nineties Sale</span><div class="cat-bar-wrap"><div class="cat-bar ntds-cat" style="width:57.6%"></div></div><span class="cat-qty">154 ชิ้น</span><span class="cat-num">29,700</span></div>
+      <div class="cat-row"><span class="cat-name">Nineties New</span><div class="cat-bar-wrap"><div class="cat-bar ntds-cat" style="width:26%"></div></div><span class="cat-qty">22 ชิ้น</span><span class="cat-num">13,400</span></div>
+      <div class="cat-row"><span class="cat-name">Nineties Basic</span><div class="cat-bar-wrap"><div class="cat-bar ntds-cat" style="width:9.5%"></div></div><span class="cat-qty">9 ชิ้น</span><span class="cat-num">4,890</span></div>
+      <div class="cat-row"><span class="cat-name">Nineties Hero</span><div class="cat-bar-wrap"><div class="cat-bar ntds-cat" style="width:6%"></div></div><span class="cat-qty">7 ชิ้น</span><span class="cat-num">3,110</span></div>
+      <div class="cat-row"><span class="cat-name">Nineties Acc</span><div class="cat-bar-wrap"><div class="cat-bar ntds-cat" style="width:1%"></div></div><span class="cat-qty">1 ชิ้น</span><span class="cat-num">490</span></div>
+      <div class="cat-row"><span class="cat-name" style="color:var(--red);">Nineties non Sale</span><div class="cat-bar-wrap"><div class="cat-bar" style="background:var(--red);width:10.3%"></div></div><span class="cat-qty" style="color:var(--red);">30 ชิ้น</span><span class="cat-num" style="color:var(--red);">-5,300</span></div>
+    </div>
+
+  </div>
+
+  <!-- PAYMENT CHANNEL -->
+  <div class="section-title">💳 ช่องทางการชำระเงิน</div>
+  <div class="pay-grid" style="margin-bottom:20px;">
+
+    <div class="pay-panel">
+      <div style="padding:8px 14px;font-size:11px;font-weight:700;color:var(--soon);background:var(--soon-light);border-bottom:1px solid var(--soon-mid);">🟠 SOON FL.1 · รวม ฿11,940</div>
+      <!-- อื่นๆ 6120, Cash 2860, KBANK 1880, SCB 1080 -->
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#E5E7EB;color:var(--ink);">💱</div>
+        <span class="pay-name">อื่นๆ (QR/Wallet)</span>
+        <span class="pay-pct">51.3%</span>
+        <span class="pay-amt" style="color:var(--soon);">฿6,120</span>
+      </div>
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#FEF3C7;color:#92400E;">💵</div>
+        <span class="pay-name">Cash</span>
+        <span class="pay-pct">24%</span>
+        <span class="pay-amt" style="color:var(--soon);">฿2,860</span>
+      </div>
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#DCFCE7;color:#166534;">🏦</div>
+        <span class="pay-name">KBANK</span>
+        <span class="pay-pct">15.7%</span>
+        <span class="pay-amt" style="color:var(--soon);">฿1,880</span>
+      </div>
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#EDE9FE;color:#4C1D95;">💜</div>
+        <span class="pay-name">SCB</span>
+        <span class="pay-pct">9%</span>
+        <span class="pay-amt" style="color:var(--soon);">฿1,080</span>
+      </div>
+    </div>
+
+    <div class="pay-panel">
+      <div style="padding:8px 14px;font-size:11px;font-weight:700;color:var(--ntds);background:var(--ntds-light);border-bottom:1px solid var(--ntds-mid);">🔵 NTDS FL.G · รวม ฿46,290</div>
+      <!-- อื่นๆ 27140, KBANK 8940, Cash 3650, KTC 1500, BAY 1390, TTB 1230, TMB 1050, SCB 900, Wechat 490 -->
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#E5E7EB;color:var(--ink);">💱</div>
+        <span class="pay-name">อื่นๆ (QR/Wallet)</span>
+        <span class="pay-pct">58.6%</span>
+        <span class="pay-amt" style="color:var(--ntds);">฿27,140</span>
+      </div>
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#DCFCE7;color:#166534;">🏦</div>
+        <span class="pay-name">KBANK</span>
+        <span class="pay-pct">19.3%</span>
+        <span class="pay-amt" style="color:var(--ntds);">฿8,940</span>
+      </div>
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#FEF3C7;color:#92400E;">💵</div>
+        <span class="pay-name">Cash</span>
+        <span class="pay-pct">7.9%</span>
+        <span class="pay-amt" style="color:var(--ntds);">฿3,650</span>
+      </div>
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#FEE2E2;color:#991B1B;">💳</div>
+        <span class="pay-name">KTC</span>
+        <span class="pay-pct">3.2%</span>
+        <span class="pay-amt" style="color:var(--ntds);">฿1,500</span>
+      </div>
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#FFF7ED;color:#9A3412;">🟠</div>
+        <span class="pay-name">BAY / KMA</span>
+        <span class="pay-pct">3%</span>
+        <span class="pay-amt" style="color:var(--ntds);">฿1,390</span>
+      </div>
+      <div class="pay-row">
+        <div class="pay-icon" style="background:#F0FDF4;color:#166534;">🟢</div>
+        <span class="pay-name">TTB / TMB / SCB / WeChat</span>
+        <span class="pay-pct">8%</span>
+        <span class="pay-amt" style="color:var(--ntds);">฿3,670</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="insights">
+    <h3>📊 Key Insights & ข้อสังเกต</h3>
+
+    <div class="insight-item">
+      <div class="insight-dot i-ntds"></div>
+      <p><strong>NTDS ทำยอดสูงกว่า SOON ~3.9 เท่า</strong> (฿46,290 vs ฿11,940) ทั้งที่ SOON อยู่ชั้น 1 แต่ NTDS อยู่ชั้น G (ชั้นล่าง) – น่าวิเคราะห์เรื่อง Traffic และ Visibility</p>
+    </div>
+
+    <div class="insight-item">
+      <div class="insight-dot i-ntds"></div>
+      <p><strong>NTDS มีบิลมากกว่า 4.4 เท่า</strong> (124 vs 28 บิล) แต่ค่าเฉลี่ยต่อบิลใกล้เคียงกัน (฿373 vs ฿426) แปลว่า SOON มี Basket size ดีกว่าเล็กน้อย</p>
+    </div>
+
+    <div class="insight-item">
+      <div class="insight-dot i-soon"></div>
+      <p><strong>SOON Peak อยู่ที่ 14:00–15:00 น.</strong> (บ่ายต้น) และมี wave ที่ 2 ช่วง 17:00–18:00 น. – ลูกค้ากลุ่มวัยทำงาน/มาห้าง</p>
+    </div>
+
+    <div class="insight-item">
+      <div class="insight-dot i-ntds"></div>
+      <p><strong>NTDS มี 2 Peak ที่แตกต่างกัน</strong> คือ 16:00 น. (21 บิล) กับ 20:00 น. (ยอดเงินสูงสุด ฿8,690) แสดงว่ามีลูกค้าช่วง Evening เยอะมาก</p>
+    </div>
+
+    <div class="insight-item">
+      <div class="insight-dot i-ntds"></div>
+      <p><strong>NTDS Sale Items ครอง 57.6%</strong> ของยอดขาย – สาขาแรกเปิดลูกค้ามาเพื่อ Sale โดยเฉพาะ CT/TT/SK/PL เป็น Category หลัก และมี <strong>Nineties non Sale -฿5,300</strong> ที่อาจเป็น Refund/คืนสินค้า ควรตรวจสอบ</p>
+    </div>
+
+    <div class="insight-item">
+      <div class="insight-dot i-soon"></div>
+      <p><strong>SOON Oversize (OV) ครองTop SKU</strong> – 5 ใน 10 อันดับแรกเป็น OV series โดยเฉพาะ Cloude Series ขายได้ดีมาก ส่วน Sale items ขายชิ้นมากที่สุด (16 ชิ้น) แต่ยอดรวมน้อยกว่า New</p>
+    </div>
+
+    <div class="insight-item">
+      <div class="insight-dot i-soon"></div>
+      <p><strong>ช่องทางชำระ:</strong> ทั้ง 2 สาขาลูกค้านิยม QR/อื่นๆ มากที่สุด (~50-58%) รองลงมาเป็น KBANK – แนะนำทำ Promotion Cashback กับ KBANK หรือ QR เพื่อกระตุ้นยอด</p>
+    </div>
+
+    <div class="insight-item">
+      <div class="insight-dot i-ntds"></div>
+      <p><strong>NTDS PL_Freshie (Grey)</strong> เป็น New item เดียวที่ติด Top 3 ด้วยยอด ฿2,370 จากแค่ 3 ชิ้น – แปลว่า Full-price item ยังขายได้ดี ควร Restock ให้พอ</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="report-footer">
+    <span>📅 วันแรกที่เปิดสาขา Central Khonkaen Campus · 20 พฤษภาคม 2569</span>
+    <span>Generated by Sales Analytics · ข้อมูลจาก POS System</span>
+  </div>
+
+</div>
+</body>
+</html>
