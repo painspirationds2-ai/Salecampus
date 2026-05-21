@@ -529,8 +529,13 @@ function parseData(rows) {
 }
 
 function peakHour(hourMap) {
+  // ใช้ 2-hour slot เดียวกับ peakBars เพื่อให้ badge ตรงกับแท่งกราฟ
+  const slots = [[10,11],[12,13],[14,15],[16,17],[18,19],[20,21]];
   let peak = null, maxRev = 0;
-  Object.entries(hourMap).forEach(([h, d]) => { if (d.rev > maxRev) { maxRev = d.rev; peak = h; } });
+  slots.forEach(([a, b]) => {
+    const rev = (hourMap[a]?.rev||0) + (hourMap[b]?.rev||0);
+    if (rev > maxRev) { maxRev = rev; peak = `${a}–${b+1}`; }
+  });
   return peak;
 }
 
@@ -862,14 +867,14 @@ function renderDashboard(data) {
       ${s && Object.keys(s.hourMap).length ? `<div class="peak-card">
         <div class="peak-head">
           <span class="peak-title" style="color:var(--soon)">SOON FL.1</span>
-          <span class="peak-badge soon">Peak ${peakHour(s.hourMap)}:00 น.</span>
+          <span class="peak-badge soon">Peak ${peakHour(s.hourMap)} น.</span>
         </div>
         ${peakBars(s.hourMap, 'soon', 'SOON')}
       </div>` : ''}
       ${n && Object.keys(n.hourMap).length ? `<div class="peak-card">
         <div class="peak-head">
           <span class="peak-title" style="color:var(--ntds)">NTDS FL.G</span>
-          <span class="peak-badge ntds">Peak ${peakHour(n.hourMap)}:00 น.</span>
+          <span class="peak-badge ntds">Peak ${peakHour(n.hourMap)} น.</span>
         </div>
         ${peakBars(n.hourMap, 'ntds', 'NTDS')}
       </div>` : ''}
