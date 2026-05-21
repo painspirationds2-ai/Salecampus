@@ -556,9 +556,19 @@ window.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem('salesData');
     if (saved) {
       const results = JSON.parse(saved);
-      renderDashboard(results);
+      // ตรวจสอบว่าข้อมูลครบ ไม่ใช่ cache เก่า
+      const valid = Object.values(results).every(d =>
+        d && Array.isArray(d.cats) && Array.isArray(d.topSku) && Array.isArray(d.payments)
+      );
+      if (valid) {
+        renderDashboard(results);
+      } else {
+        localStorage.removeItem('salesData'); // ล้าง cache เก่าทิ้ง
+      }
     }
-  } catch(e) {}
+  } catch(e) {
+    localStorage.removeItem('salesData');
+  }
 });
 
 function generateInsights(s, n) {
