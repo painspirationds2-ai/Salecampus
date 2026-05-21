@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Sales Exec Summary</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&family=Teko:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0A0F;
+    --surface: #13131A;
+    --card: #1C1C27;
+    --border: rgba(255,255,255,0.07);
+    --soon: #FF5C35;
+    --soon-glow: rgba(255,92,53,0.2);
+    --ntds: #3B82F6;
+    --ntds-glow: rgba(59,130,246,0.2);
+    --gold: #F4C542;
+    --green: #22C55E;
+    --red: #EF4444;
+    --text: #F0F0F5;
+    --muted: rgba(240,240,245,0.45);
+    --line: rgba(255,255,255,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Noto Sans Thai', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+
+  /* ── UPLOAD SCREEN ── */
+  #upload-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    gap: 28px;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.12) 0%, transparent 70%),
+                var(--bg);
+  }
+
+  .logo-area { text-align: center; }
+  .logo-area .brand { font-family: 'Teko', sans-serif; font-size: 42px; font-weight: 700; letter-spacing: 3px; line-height: 1; }
+  .logo-area .brand span:first-child { color: var(--soon); }
+  .logo-area .brand span:last-child { color: var(--ntds); }
+  .logo-area .tagline { font-size: 12px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
+
+  .upload-zone {
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border: 2px dashed rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .upload-zone.drag-over { border-color: var(--ntds); background: rgba(59,130,246,0.05); }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 36px; margin-bottom: 10px; }
+  .upload-zone h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .file-list { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 8px; }
+  .file-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--border);
+  }
+  .file-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .file-name { flex: 1; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-brand { font-size: 10px; font-weight: 800; letter-spacing: 1px; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+  .file-remove { font-size: 16px; color: var(--muted); cursor: pointer; flex-shrink: 0; padding: 0 4px; }
+  .file-remove:hover { color: var(--red); }
+
+  .analyze-btn {
+    width: 100%;
+    max-width: 360px;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Noto Sans Thai', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--soon), var(--ntds));
+    color: #fff;
+    letter-spacing: 0.5px;
+    opacity: 0.4;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .analyze-btn.ready { opacity: 1; }
+  .analyze-btn.ready:active { transform: scale(0.98); }
+
+  /* ── DASHBOARD ── */
+  #dashboard { display: none; padding: 0 0 48px; }
+
+  /* header */
+  .dash-header {
+    background: linear-gradient(160deg, rgba(255,92,53,0.15), rgba(59,130,246,0.15));
+    padding: 20px 20px 18px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+  }
+  .dash-header-row { display: flex; align-items: center; justify-content: space-between; }
+  .dash-title { font-family: 'Teko', sans-serif; font-size: 26px; font-weight: 600; letter-spacing: 1px; line-height: 1; }
+  .dash-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .back-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 8px; font-size: 11px; cursor: pointer; font-family: inherit; }
+
+  /* section */
+  .section { padding: 20px 20px 4px; }
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+  /* kpi cards */
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+
+  .kpi-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    border-radius: 16px 16px 0 0;
+  }
+  .kpi-card.soon::before { background: var(--soon); box-shadow: 0 0 12px var(--soon-glow); }
+  .kpi-card.ntds::before { background: var(--ntds); box-shadow: 0 0 12px var(--ntds-glow); }
+  .kpi-card.total { grid-column: 1/-1; background: var(--surface); }
+  .kpi-card.total::before { background: linear-gradient(90deg, var(--soon), var(--ntds)); }
+
+  .kpi-label { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .kpi-val {
+    font-family: 'Teko', sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+  .kpi-card.soon .kpi-val { color: var(--soon); }
+  .kpi-card.ntds .kpi-val { color: var(--ntds); }
+  .kpi-card.total .kpi-val { font-size: 40px; background: linear-gradient(90deg, var(--soon), var(--ntds)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .kpi-brand { font-size: 10px; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px; }
+  .kpi-card.soon .kpi-brand { color: var(--soon); }
+  .kpi-card.ntds .kpi-brand { color: var(--ntds); }
+
+  /* compare strip */
+  .compare-strip {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin: 0 20px 10px;
+  }
+  .compare-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .compare-row:last-child { margin-bottom: 0; }
+  .compare-label { font-size: 11px; color: var(--muted); width: 70px; flex-shrink: 0; }
+  .compare-bars { flex: 1; display: flex; gap: 3px; flex-direction: column; }
+  .cbar-wrap { height: 10px; border-radius: 4px; overflow: hidden; background: rgba(255,255,255,0.05); }
+  .cbar { height: 100%; border-radius: 4px; }
+  .cbar.soon { background: var(--soon); }
+  .cbar.ntds { background: var(--ntds); }
+  .compare-vals { display: flex; justify-content: space-between; margin-top: 2px; }
+  .cval { font-size: 10px; font-weight: 700; font-family: 'Teko', monospace; }
+  .cval.soon { color: var(--soon); }
+  .cval.ntds { color: var(--ntds); }
+
+  /* peak time */
+  .peak-section { margin: 0 20px 10px; }
+  .peak-card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .peak-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .peak-title { font-size: 12px; font-weight: 700; }
+  .peak-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+  .peak-badge.soon { background: var(--soon-glow); color: var(--soon); border: 1px solid var(--soon); }
+  .peak-badge.ntds { background: var(--ntds-glow); color: var(--ntds); border: 1px solid var(--ntds); }
+
+  .hbar { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .hbar-hour { font-size: 10px; font-family: 'Teko', sans-serif; font-weight: 500; color: var(--muted); width: 22px; text-align: right; flex-shrink: 0; }
+  .hbar-track { flex: 1; height: 12px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 3px; }
+  .hbar-val { font-size: 9px; font-family: 'Teko', sans-serif; font-weight: 500; color: var(--muted); width: 34px; text-align: right; flex-shrink: 0; }
+  .is-peak .hbar-hour { color: var(--gold); font-weight: 700; }
+  .is-peak .hbar-val { color: var(--gold); font-weight: 700; }
+
+  /* top sku */
+  .sku-list { margin: 0 20px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .sku-item {
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sku-rank {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; flex-shrink: 0;
+  }
+  .rank-1 { background: var(--gold); color: #000; }
+  .rank-2 { background: #94A3B8; color: #000; }
+  .rank-3 { background: #CD7C3E; color: #fff; }
+  .rank-other { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+  .sku-info { flex: 1; min-width: 0; }
+  .sku-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sku-code { font-size: 10px; color: var(--muted); }
+  .sku-right { text-align: right; flex-shrink: 0; }
+  .sku-rev { font-family: 'Teko', sans-serif; font-size: 18px; font-weight: 600; line-height: 1; }
+  .sku-qty { font-size: 10px; color: var(--muted); }
+  .sku-brand-tag { font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 99px; margin-bottom: 3px; display: inline-block; }
+  .tag-soon { background: var(--soon-glow); color: var(--soon); }
+  .tag-ntds { background: var(--ntds-glow); color: var(--ntds); }
+
+  /* insights */
+  .insights-list { margin: 0 20px 10px; display: flex; flex-direction: column; gap: 8px; }
+  .insight-card {
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 13px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .insight-icon { font-size: 18px; flex-shrink: 0; }
+  .insight-text { font-size: 12.5px; line-height: 1.55; color: rgba(240,240,245,0.85); }
+  .insight-text strong { color: #fff; }
+
+  /* category */
+  .cat-grid-2 { margin: 0 20px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cat-card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+  .cat-head { padding: 10px 12px 8px; font-size: 11px; font-weight: 700; border-bottom: 1px solid var(--border); }
+  .cat-head.soon { color: var(--soon); }
+  .cat-head.ntds { color: var(--ntds); }
+  .cat-row-item { padding: 6px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); }
+  .cat-row-item:last-child { border-bottom: none; }
+  .cat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .cat-name-s { flex: 1; font-size: 10.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cat-rev { font-family: 'Teko', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); flex-shrink: 0; }
+
+  /* payment */
+  .pay-grid { margin: 0 20px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pay-card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+  .pay-head { padding: 10px 12px 8px; font-size: 11px; font-weight: 700; border-bottom: 1px solid var(--border); }
+  .pay-head.soon { color: var(--soon); }
+  .pay-head.ntds { color: var(--ntds); }
+  .pay-item { padding: 7px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
+  .pay-item:last-child { border-bottom: none; }
+  .pay-ch { font-size: 11px; font-weight: 600; }
+  .pay-amt-s { font-family: 'Teko', sans-serif; font-size: 15px; font-weight: 500; color: var(--muted); }
+
+  /* footer */
+  .dash-footer { padding: 20px; text-align: center; color: var(--muted); font-size: 11px; line-height: 1.7; }
+
+  /* loading */
+  #loading {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,10,15,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--soon);
+    border-right-color: var(--ntds);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading p { font-size: 13px; color: var(--muted); }
+
+  /* animate in */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 0.4s ease forwards;
+  }
+  @keyframes fadeUp { to { opacity: 1; transform: none; } }
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.1s; }
+  .delay-3 { animation-delay: 0.15s; }
+  .delay-4 { animation-delay: 0.2s; }
+  .delay-5 { animation-delay: 0.25s; }
+  .delay-6 { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p>กำลังวิเคราะห์ข้อมูล...</p>
+</div>
+
+<!-- UPLOAD SCREEN -->
+<div id="upload-screen">
+  <div class="logo-area fade-up">
+    <div class="brand"><span>SOON</span> <span>NTDS</span></div>
+    <div class="tagline">Executive Sales Summary</div>
+  </div>
+
+  <div class="upload-zone fade-up delay-1" id="drop-zone">
+    <input type="file" id="file-input" accept=".xlsx" multiple>
+    <div class="upload-icon">📊</div>
+    <h3>อัปโหลดไฟล์ Excel</h3>
+    <p>วางไฟล์ที่นี่ หรือกดเพื่อเลือก<br>รองรับ SOON และ NTDS ได้พร้อมกัน</p>
+  </div>
+
+  <div class="file-list fade-up delay-2" id="file-list"></div>
+
+  <button class="analyze-btn fade-up delay-3" id="analyze-btn" onclick="analyze()">
+    วิเคราะห์ยอดขาย →
+  </button>
+
+  <p style="font-size:11px;color:var(--muted);text-align:center;max-width:280px;" class="fade-up delay-4">
+    ข้อมูลไม่ถูกส่งออกนอกอุปกรณ์<br>ประมวลผลในเครื่องเท่านั้น 🔒
+  </p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard"></div>
+
+<script>
+const files = { SOON: null, NTDS: null };
+
+function detectBrand(filename) {
+  const f = filename.toUpperCase();
+  if (f.includes('SOON')) return 'SOON';
+  if (f.includes('NTDS') || f.includes('NINETIES')) return 'NTDS';
+  return null;
+}
+
+const fileInput = document.getElementById('file-input');
+const dropZone = document.getElementById('drop-zone');
+const fileListEl = document.getElementById('file-list');
+const analyzeBtn = document.getElementById('analyze-btn');
+
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+
+function handleFiles(flist) {
+  Array.from(flist).forEach(f => {
+    const brand = detectBrand(f.name) || prompt(`ไฟล์ "${f.name}" เป็นของแบรนด์อะไร? (SOON / NTDS)`);
+    if (brand) files[brand.toUpperCase()] = f;
+  });
+  renderFileList();
+  analyzeBtn.classList.toggle('ready', files.SOON || files.NTDS);
+}
+
+function renderFileList() {
+  fileListEl.innerHTML = ['SOON','NTDS'].filter(b => files[b]).map(b => `
+    <div class="file-item">
+      <div class="file-dot" style="background:${b==='SOON'?'var(--soon)':'var(--ntds)'}"></div>
+      <span class="file-name">${files[b].name}</span>
+      <span class="file-brand" style="background:${b==='SOON'?'var(--soon-glow)':'var(--ntds-glow)'};color:${b==='SOON'?'var(--soon)':'var(--ntds)'}">${b}</span>
+      <span class="file-remove" onclick="removeFile('${b}')">✕</span>
+    </div>`).join('');
+}
+
+function removeFile(brand) {
+  files[brand] = null;
+  renderFileList();
+  analyzeBtn.classList.toggle('ready', files.SOON || files.NTDS);
+}
+
+async function readExcel(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      // find header row
+      let hdrIdx = 0;
+      for (let i = 0; i < raw.length; i++) {
+        if (raw[i] && raw[i].includes('#')) { hdrIdx = i; break; }
+      }
+      const headers = ['no','type','order_id','created_by','customer_name','customer_code','email','phone',
+        'address','tax_id','ref','channel','date','discount','platform_income','shipping_fee',
+        'subtotal','vat','ship_date','tracking','ship_channel','receiver_name','receiver_phone',
+        'receiver_email','receiver_address','postcode','province','district','subdistrict',
+        'value','remark','tag','status','branch','payment_status','invoice','payment_channel',
+        'amount_paid','payment_date','sku','product_name','qty','unit_price','unit_discount',
+        'total_price','lot','category'];
+      const rows = [];
+      for (let i = hdrIdx + 1; i < raw.length; i++) {
+        if (!raw[i] || !raw[i][1]) continue;
+        const obj = {};
+        headers.forEach((h, idx) => obj[h] = raw[i][idx]);
+        if (obj.type === 'ขายออก') rows.push(obj);
+      }
+      resolve(rows);
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function num(v) { return parseFloat(v) || 0; }
+function fmt(n) { return Math.round(n).toLocaleString('th-TH'); }
+
+function parseData(rows) {
+  const billMap = {};
+  rows.forEach(r => {
+    if (r.value !== undefined && r.value !== null && r.value !== '') {
+      if (!billMap[r.order_id]) billMap[r.order_id] = { value: num(r.value), payment_channel: r.payment_channel, payment_date: r.payment_date, amount_paid: num(r.amount_paid) };
+    }
+  });
+  const bills = Object.values(billMap);
+  const totalRev = bills.reduce((s, b) => s + b.value, 0);
+  const billCount = bills.length;
+  const avgBill = billCount ? totalRev / billCount : 0;
+
+  // items
+  const items = rows.filter(r => r.sku);
+  const totalQty = items.reduce((s, r) => s + num(r.qty), 0);
+
+  // peak time
+  const hourMap = {};
+  bills.forEach(b => {
+    if (!b.payment_date) return;
+    const str = String(b.payment_date);
+    const match = str.match(/(\d{1,2}):(\d{2})/);
+    if (!match) return;
+    const h = parseInt(match[1]);
+    if (!hourMap[h]) hourMap[h] = { bills: 0, rev: 0 };
+    hourMap[h].bills++;
+    hourMap[h].rev += b.value;
+  });
+
+  // sku
+  const skuMap = {};
+  items.forEach(r => {
+    const k = r.sku;
+    if (!skuMap[k]) skuMap[k] = { name: r.product_name, qty: 0, rev: 0 };
+    skuMap[k].qty += num(r.qty);
+    skuMap[k].rev += num(r.total_price);
+  });
+  const topSku = Object.entries(skuMap).sort((a,b) => b[1].rev - a[1].rev).slice(0, 5);
+
+  // category
+  const catMap = {};
+  items.forEach(r => {
+    const c = r.category || 'ไม่ระบุ';
+    if (!catMap[c]) catMap[c] = { qty: 0, rev: 0 };
+    catMap[c].qty += num(r.qty);
+    catMap[c].rev += num(r.total_price);
+  });
+  const cats = Object.entries(catMap).sort((a,b) => b[1].rev - a[1].rev);
+
+  // payment
+  const payMap = {};
+  bills.forEach(b => {
+    const ch = b.payment_channel || 'ไม่ระบุ';
+    if (!payMap[ch]) payMap[ch] = 0;
+    payMap[ch] += b.value;
+  });
+  const payments = Object.entries(payMap).sort((a,b) => b[1] - a[1]);
+
+  // date
+  let dateStr = '—';
+  const firstDate = bills.find(b => b.payment_date);
+  if (firstDate) dateStr = String(firstDate.payment_date).split(' ')[0];
+
+  return { totalRev, billCount, avgBill, totalQty, hourMap, topSku, cats, payments, dateStr };
+}
+
+function peakHour(hourMap) {
+  let peak = null, maxRev = 0;
+  Object.entries(hourMap).forEach(([h, d]) => { if (d.rev > maxRev) { maxRev = d.rev; peak = h; } });
+  return peak;
+}
+
+async function analyze() {
+  if (!files.SOON && !files.NTDS) return;
+  document.getElementById('loading').style.display = 'flex';
+
+  const results = {};
+  if (files.SOON) { const rows = await readExcel(files.SOON); results.SOON = parseData(rows); }
+  if (files.NTDS) { const rows = await readExcel(files.NTDS); results.NTDS = parseData(rows); }
+
+  document.getElementById('loading').style.display = 'none';
+  renderDashboard(results);
+}
+
+function renderDashboard(data) {
+  const s = data.SOON;
+  const n = data.NTDS;
+  const bothPresent = s && n;
+  const dateStr = (s || n).dateStr;
+
+  const totalRev = (s ? s.totalRev : 0) + (n ? n.totalRev : 0);
+  const totalBills = (s ? s.billCount : 0) + (n ? n.billCount : 0);
+
+  // color helpers
+  const sColor = 'var(--soon)';
+  const nColor = 'var(--ntds)';
+
+  // peak hour bar builder
+  function peakBars(hourMap, cls, brand) {
+    const hours = Object.keys(hourMap).map(Number).sort((a,b)=>a-b);
+    const maxRev = Math.max(...Object.values(hourMap).map(d => d.rev));
+    const peakH = peakHour(hourMap);
+    return hours.map(h => {
+      const d = hourMap[h];
+      const pct = maxRev ? (d.rev / maxRev * 100).toFixed(1) : 0;
+      const isPeak = String(h) === String(peakH);
+      return `<div class="hbar ${isPeak ? 'is-peak' : ''}">
+        <span class="hbar-hour">${h}</span>
+        <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${isPeak ? 'var(--gold)' : (cls === 'soon' ? sColor : nColor)}"></div></div>
+        <span class="hbar-val">${isPeak ? '⭐' : ''} ${d.rev >= 1000 ? (d.rev/1000).toFixed(1)+'k' : d.rev}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // sku list builder
+  function skuItems(topSku, brand) {
+    const cls = brand === 'SOON' ? 'soon' : 'ntds';
+    return topSku.map(([sku, d], i) => {
+      const ranks = ['rank-1','rank-2','rank-3','rank-other','rank-other'];
+      return `<div class="sku-item fade-up delay-${i+1}">
+        <div class="sku-rank ${ranks[i]}">${i+1}</div>
+        <div class="sku-info">
+          <div class="sku-name">${d.name || sku}</div>
+          <div class="sku-code">${sku}</div>
+        </div>
+        <div class="sku-right">
+          <div class="sku-brand-tag tag-${cls}">${brand}</div>
+          <div class="sku-rev" style="color:${cls==='soon'?sColor:nColor}">฿${fmt(d.rev)}</div>
+          <div class="sku-qty">×${d.qty} ชิ้น</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // category builder
+  function catItems(cats, cls) {
+    const maxRev = Math.max(...cats.map(c => Math.abs(c[1].rev)));
+    return cats.slice(0,5).map(([name, d]) => {
+      const isNeg = d.rev < 0;
+      const pct = maxRev ? (Math.abs(d.rev) / maxRev * 100).toFixed(0) : 0;
+      return `<div class="cat-row-item">
+        <div class="cat-dot" style="background:${isNeg ? 'var(--red)' : (cls==='soon' ? sColor : nColor)}"></div>
+        <span class="cat-name-s">${name}</span>
+        <span class="cat-rev" style="color:${isNeg ? 'var(--red)' : ''}">${isNeg ? '-' : ''}฿${fmt(Math.abs(d.rev))}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // payment builder
+  function payItems(payments) {
+    return payments.slice(0, 5).map(([ch, amt]) => `
+      <div class="pay-item">
+        <span class="pay-ch">${ch}</span>
+        <span class="pay-amt-s">฿${fmt(amt)}</span>
+      </div>`).join('');
+  }
+
+  // combined top SKU
+  const allSkuMap = {};
+  [['SOON', s], ['NTDS', n]].forEach(([brand, d]) => {
+    if (!d) return;
+    d.topSku.forEach(([sku, info]) => {
+      if (!allSkuMap[sku]) allSkuMap[sku] = { ...info, brand };
+      else { allSkuMap[sku].qty += info.qty; allSkuMap[sku].rev += info.rev; }
+    });
+  });
+  const allTopSku = Object.entries(allSkuMap).sort((a,b) => b[1].rev - a[1].rev).slice(0, 5);
+
+  const html = `
+    <!-- HEADER -->
+    <div class="dash-header fade-up">
+      <div class="dash-header-row">
+        <div>
+          <div class="dash-title">Sales Summary</div>
+          <div class="dash-date">📅 ${dateStr} · วันแรกที่เปิดสาขา</div>
+        </div>
+        <button class="back-btn" onclick="showUpload()">↩ เปลี่ยนไฟล์</button>
+      </div>
+    </div>
+
+    <!-- OVERVIEW KPI -->
+    <div class="section fade-up delay-1">
+      <div class="section-label">📊 ภาพรวมยอดขาย</div>
+    </div>
+    <div style="padding:0 20px 10px;" class="fade-up delay-2">
+      <div class="kpi-grid">
+        ${bothPresent ? `<div class="kpi-card total">
+          <div class="kpi-label">ยอดรวม 2 สาขา</div>
+          <div class="kpi-val">฿${fmt(totalRev)}</div>
+          <div class="kpi-sub">${fmt(totalBills)} บิล · ทุก SKU</div>
+        </div>` : ''}
+        ${s ? `<div class="kpi-card soon">
+          <div class="kpi-brand">SOON FL.1</div>
+          <div class="kpi-label">ยอดขาย</div>
+          <div class="kpi-val">฿${fmt(s.totalRev)}</div>
+          <div class="kpi-sub">${s.billCount} บิล · avg ฿${fmt(s.avgBill)}</div>
+        </div>
+        <div class="kpi-card soon">
+          <div class="kpi-brand">SOON FL.1</div>
+          <div class="kpi-label">ชิ้นที่ขายได้</div>
+          <div class="kpi-val">${s.totalQty}</div>
+          <div class="kpi-sub">ชิ้น รวมทุก SKU</div>
+        </div>` : ''}
+        ${n ? `<div class="kpi-card ntds">
+          <div class="kpi-brand">NTDS FL.G</div>
+          <div class="kpi-label">ยอดขาย</div>
+          <div class="kpi-val">฿${fmt(n.totalRev)}</div>
+          <div class="kpi-sub">${n.billCount} บิล · avg ฿${fmt(n.avgBill)}</div>
+        </div>
+        <div class="kpi-card ntds">
+          <div class="kpi-brand">NTDS FL.G</div>
+          <div class="kpi-label">ชิ้นที่ขายได้</div>
+          <div class="kpi-val">${n.totalQty}</div>
+          <div class="kpi-sub">ชิ้น รวมทุก SKU</div>
+        </div>` : ''}
+      </div>
+    </div>
+
+    ${bothPresent ? `
+    <!-- COMPARE -->
+    <div class="section fade-up delay-3"><div class="section-label">⚖️ เปรียบเทียบสาขา</div></div>
+    <div class="compare-strip fade-up delay-3">
+      <div class="compare-row">
+        <span class="compare-label" style="font-size:10px;font-weight:700;">ยอดขาย</span>
+        <div class="compare-bars">
+          <div class="cbar-wrap"><div class="cbar soon" style="width:${(s.totalRev/(s.totalRev+n.totalRev)*100).toFixed(1)}%"></div></div>
+          <div class="cbar-wrap"><div class="cbar ntds" style="width:${(n.totalRev/(s.totalRev+n.totalRev)*100).toFixed(1)}%"></div></div>
+          <div class="compare-vals"><span class="cval soon">SOON ฿${fmt(s.totalRev)}</span><span class="cval ntds">NTDS ฿${fmt(n.totalRev)}</span></div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label" style="font-size:10px;font-weight:700;">บิล</span>
+        <div class="compare-bars">
+          <div class="cbar-wrap"><div class="cbar soon" style="width:${(s.billCount/(s.billCount+n.billCount)*100).toFixed(1)}%"></div></div>
+          <div class="cbar-wrap"><div class="cbar ntds" style="width:${(n.billCount/(s.billCount+n.billCount)*100).toFixed(1)}%"></div></div>
+          <div class="compare-vals"><span class="cval soon">SOON ${s.billCount} บิล</span><span class="cval ntds">NTDS ${n.billCount} บิล</span></div>
+        </div>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label" style="font-size:10px;font-weight:700;">Avg/บิล</span>
+        <div class="compare-bars">
+          <div class="cbar-wrap"><div class="cbar soon" style="width:${(s.avgBill/Math.max(s.avgBill,n.avgBill)*100).toFixed(1)}%"></div></div>
+          <div class="cbar-wrap"><div class="cbar ntds" style="width:${(n.avgBill/Math.max(s.avgBill,n.avgBill)*100).toFixed(1)}%"></div></div>
+          <div class="compare-vals"><span class="cval soon">SOON ฿${fmt(s.avgBill)}</span><span class="cval ntds">NTDS ฿${fmt(n.avgBill)}</span></div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- PEAK TIME -->
+    <div class="section fade-up delay-4"><div class="section-label">⏱ Peak Time</div></div>
+    <div class="peak-section fade-up delay-4">
+      ${s && Object.keys(s.hourMap).length ? `<div class="peak-card">
+        <div class="peak-head">
+          <span class="peak-title" style="color:var(--soon)">SOON FL.1</span>
+          <span class="peak-badge soon">Peak ${peakHour(s.hourMap)}:00 น.</span>
+        </div>
+        ${peakBars(s.hourMap, 'soon', 'SOON')}
+      </div>` : ''}
+      ${n && Object.keys(n.hourMap).length ? `<div class="peak-card">
+        <div class="peak-head">
+          <span class="peak-title" style="color:var(--ntds)">NTDS FL.G</span>
+          <span class="peak-badge ntds">Peak ${peakHour(n.hourMap)}:00 น.</span>
+        </div>
+        ${peakBars(n.hourMap, 'ntds', 'NTDS')}
+      </div>` : ''}
+    </div>
+
+    <!-- TOP SKU -->
+    <div class="section fade-up delay-5"><div class="section-label">🏆 Top SKUs รวม 2 สาขา</div></div>
+    <div class="sku-list fade-up delay-5">
+      ${allTopSku.map(([sku, d], i) => {
+        const ranks = ['rank-1','rank-2','rank-3','rank-other','rank-other'];
+        const cls = d.brand === 'SOON' ? 'soon' : 'ntds';
+        return `<div class="sku-item">
+          <div class="sku-rank ${ranks[i]}">${i+1}</div>
+          <div class="sku-info">
+            <div class="sku-name">${d.name || sku}</div>
+            <div class="sku-code">${sku}</div>
+          </div>
+          <div class="sku-right">
+            <div class="sku-brand-tag tag-${cls}">${d.brand}</div>
+            <div class="sku-rev" style="color:${cls==='soon'?sColor:nColor}">฿${fmt(d.rev)}</div>
+            <div class="sku-qty">×${d.qty} ชิ้น</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- CATEGORY -->
+    <div class="section fade-up delay-5"><div class="section-label">🗂 หมวดหมู่</div></div>
+    <div class="cat-grid-2 fade-up delay-5">
+      ${s ? `<div class="cat-card">
+        <div class="cat-head soon">🟠 SOON</div>
+        ${catItems(s.cats, 'soon')}
+      </div>` : ''}
+      ${n ? `<div class="cat-card">
+        <div class="cat-head ntds">🔵 NTDS</div>
+        ${catItems(n.cats, 'ntds')}
+      </div>` : ''}
+    </div>
+
+    <!-- PAYMENT -->
+    <div class="section fade-up delay-6"><div class="section-label">💳 ช่องทางชำระเงิน</div></div>
+    <div class="pay-grid fade-up delay-6">
+      ${s ? `<div class="pay-card">
+        <div class="pay-head soon">🟠 SOON</div>
+        ${payItems(s.payments)}
+      </div>` : ''}
+      ${n ? `<div class="pay-card">
+        <div class="pay-head ntds">🔵 NTDS</div>
+        ${payItems(n.payments)}
+      </div>` : ''}
+    </div>
+
+    <!-- FOOTER -->
+    <div class="dash-footer">
+      Sales Summary · ${dateStr}<br>
+      Central Khonkaen Campus
+    </div>
+  `;
+
+  const dash = document.getElementById('dashboard');
+  dash.innerHTML = html;
+  dash.style.display = 'block';
+  document.getElementById('upload-screen').style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+function showUpload() {
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('upload-screen').style.display = 'flex';
+}
+</script>
+</body>
+</html>
